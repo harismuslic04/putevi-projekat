@@ -21,8 +21,6 @@ RUN touch database/database.sqlite
 
 RUN chmod -R 775 storage bootstrap/cache database
 
-RUN php artisan key:generate --force
-
 EXPOSE 8080
 
 CMD php artisan serve --host=0.0.0.0 --port=$PORT
