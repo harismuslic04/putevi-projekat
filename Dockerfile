@@ -1,10 +1,13 @@
 FROM serversideup/php:8.2-fpm-nginx
 
+# Privremeno prelazimo na root korisnika kako bismo resili dozvole i instalaciju
+USER root
+
 # Podesavanje dokument korena za Laravel
 ENV WEB_DOCUMENT_ROOT=/var/www/html/public
 
-# Kopiranje projektnih fajlova sa odgovarajucim vlasnistvom
-COPY --chown=9999:9999 . /var/www/html
+# Kopiranje projektnih fajlova
+COPY . /var/www/html
 
 # Instaliranje PHP zavisnosti preko Composera
 RUN composer install --no-interaction --no-plugins --no-scripts --no-dev --prefer-dist
@@ -21,5 +24,9 @@ ENV APP_KEY=base64:081WI5fRy6c5p0SrkAcRkEEvqfEvTqcuev8eYtb1Nt8=
 RUN php artisan migrate --force && \
     php artisan db:seed --force
 
-# Ponovno postavljanje dozvola za bazu nakon sto je popunjena podacima
-RUN chmod 777 database/database.sqlite
+# Dodeljujemo vlasnistvo nad fajlovima web serveru (korisnik 9999 na serversideup slikama)
+RUN chown -R 9999:9999 /var/www/html && \
+    chmod 777 database/database.sqlite
+
+# Vracamo se na sigurnog korisnika (9999) koji ce pokretati web server
+USER 9999
